@@ -60,10 +60,22 @@ export const useAuth = create<AuthState>((set) => ({
     }
   },
 
-  register: async (dto: SignUpRequestDto) => {
+  register: async ({
+    department_id,
+    email,
+    name,
+    password,
+    role = 'member',
+  }: SignUpRequestDto) => {
     set({ isLoading: true, error: null });
     try {
-      await signUpService(dto);
+      await signUpService({
+        department_id,
+        email,
+        name,
+        password,
+        role,
+      });
 
       set({ isLoading: false });
     } catch (err: unknown) {

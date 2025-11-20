@@ -41,7 +41,7 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
     onMutate: () => setLoading(true),
     onSuccess: () => {
       onSuccess();
-      queryClient.invalidateQueries({ queryKey: [''] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
     },
     onError: (error) =>
       Alert.alert('Erro', error.message || 'Erro ao enviar check-in'),

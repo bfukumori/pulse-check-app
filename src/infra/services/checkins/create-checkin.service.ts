@@ -8,7 +8,7 @@ export async function createCheckInService({
   mood,
   note,
 }: CreateCheckInsRequestDto): Promise<CreateCheckInsResponseDto> {
-  const response = await api.post('/checkins', {
+  const response = await api.post('/checkins/create', {
     mood,
     note,
   });

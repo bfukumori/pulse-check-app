@@ -2,13 +2,10 @@ interface SignUpRequestDto {
   name: string;
   email: string;
   password: string;
-  departmentId?: number;
+  role?: 'admin' | 'member';
+  department_id: number;
 }
 
-interface SignUpResponseDto {
-  id: string;
-  name: string;
-  email: string;
-}
+type SignUpResponseDto = string;
 
 export { type SignUpRequestDto, type SignUpResponseDto };

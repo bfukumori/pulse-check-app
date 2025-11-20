@@ -34,7 +34,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Estatísticas do Departamento</Text>
+      <Text style={styles.sectionTitle}>Estatísticas</Text>
 
       <View style={styles.mainCard}>
         <Text style={styles.mainCardEmoji}>{moodEmoji}</Text>

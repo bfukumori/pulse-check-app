@@ -25,6 +25,7 @@ export default function HomeScreen() {
     data: stats,
     isPending: loading,
     isRefetching: refreshing,
+    refetch,
   } = useQuery({
     queryKey: ['stats'],
     queryFn: getStatsService,
@@ -61,7 +62,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => {}} />
+          <RefreshControl refreshing={refreshing} onRefresh={refetch} />
         }
       >
         <TouchableOpacity
@@ -80,7 +81,7 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" color="#6366f1" />
             <Text style={styles.loadingText}>Carregando estatísticas...</Text>
           </View>
-        ) : stats ? (
+        ) : stats && stats.totalCheckins > 0 ? (
           <DashboardStats stats={stats} />
         ) : (
           <View style={styles.emptyState}>

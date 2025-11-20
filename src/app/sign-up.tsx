@@ -28,7 +28,7 @@ export default function SignUpScreen() {
   const [departmentId, setDepartmentId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
 
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const { navigate } = useRouter();
 
   const { data: departments, isPending } = useQuery({
@@ -40,12 +40,8 @@ export default function SignUpScreen() {
   const { mutateAsync: signUp } = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-        {
-          text: 'Ir para Login',
-          onPress: () => navigate('/sign-in'),
-        },
-      ]);
+      Alert.alert('Sucesso', 'Conta criada com sucesso!');
+      login({ email, password });
     },
     onError: (error) =>
       Alert.alert('Erro', error.message || 'Erro ao criar conta'),
@@ -70,13 +66,18 @@ export default function SignUpScreen() {
       return;
     }
 
+    if (!departmentId) {
+      Alert.alert('Erro', 'Selecione um departamento');
+      return;
+    }
+
     setLoading(true);
 
     await signUp({
       name,
       email,
       password,
-      departmentId,
+      department_id: departmentId,
     });
   };
 
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   picker: {
-    height: 50,
+    height: 60,
   },
   loadingDepts: {
     flexDirection: 'row',

@@ -29,8 +29,8 @@ export default function SignInScreen() {
     setLoading(true);
     try {
       await login({ email, password });
-    } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao fazer login');
+    } catch {
+      Alert.alert('Erro', 'Credenciais inválidas');
     } finally {
       setLoading(false);
     }
