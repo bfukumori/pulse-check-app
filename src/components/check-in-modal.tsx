@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { createCheckInService } from '../infra/services/checkins/create-checkin.service';
 
 interface CheckinModalProps {
   visible: boolean;
@@ -29,26 +31,33 @@ export const CheckinModal: React.FC<CheckinModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const queryClient = useQueryClient();
+
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const { mutateAsync: createCheckin } = useMutation({
+    mutationFn: createCheckInService,
+    onMutate: () => setLoading(true),
+    onSuccess: () => {
+      onSuccess();
+      queryClient.invalidateQueries({ queryKey: [''] });
+    },
+    onError: (error) =>
+      Alert.alert('Erro', error.message || 'Erro ao enviar check-in'),
+    onSettled: () => {
+      setLoading(false);
+      setSelectedMood(null);
+      setNote('');
+    },
+  });
 
   const handleSubmit = async () => {
     if (selectedMood === null) {
       Alert.alert('Atenção', 'Por favor, selecione como você está se sentindo');
       return;
     }
-
-    setLoading(true);
-    try {
-      setSelectedMood(null);
-      setNote('');
-      onSuccess();
-    } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao enviar check-in');
-    } finally {
-      setLoading(false);
-    }
+    await createCheckin({ mood: selectedMood, note });
   };
 
   const handleClose = () => {

@@ -1,6 +1,9 @@
-import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+
+import { useQuery } from '@tanstack/react-query';
+
 import {
   ActivityIndicator,
   Alert,
@@ -12,45 +15,40 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 
-import { useAuth } from "../infra/stores/auth.store";
-
-const departments = [
-  {
-    id: 1,
-    name: "RH",
-  },
-  {
-    id: 2,
-    name: "TI",
-  },
-];
+import { getDepartmentsService } from '../infra/services/departments/get-departments.service';
+import { useAuth } from '../infra/stores/auth.store';
 
 export default function SignUpScreen() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [departmentId, setDepartmentId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
+  const { data: departments, isPending } = useQuery({
+    queryKey: ['departments'],
+    queryFn: getDepartmentsService,
+    staleTime: Infinity,
+  });
 
   const { register } = useAuth();
   const { navigate } = useRouter();
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert("Erro", "Preencha todos os campos obrigatórios");
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Erro", "As senhas não coincidem");
+      Alert.alert('Erro', 'As senhas não coincidem');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres");
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
       return;
     }
 
@@ -63,14 +61,14 @@ export default function SignUpScreen() {
         departmentId,
       });
 
-      Alert.alert("Sucesso", "Conta criada com sucesso!", [
+      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
         {
-          text: "Ir para Login",
-          onPress: () => navigate("/sign-in"),
+          text: 'Ir para Login',
+          onPress: () => navigate('/sign-in'),
         },
       ]);
     } catch (error: any) {
-      Alert.alert("Erro", error.message || "Erro ao criar conta");
+      Alert.alert('Erro', error.message || 'Erro ao criar conta');
     } finally {
       setLoading(false);
     }
@@ -78,7 +76,7 @@ export default function SignUpScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -127,7 +125,7 @@ export default function SignUpScreen() {
               editable={!loading}
             />
 
-            {false ? (
+            {isPending ? (
               <View style={styles.loadingDepts}>
                 <ActivityIndicator color="#6366f1" />
                 <Text style={styles.loadingDeptsText}>
@@ -148,7 +146,7 @@ export default function SignUpScreen() {
                     label="Selecione um departamento (opcional)"
                     value={undefined}
                   />
-                  {departments.map((dept) => (
+                  {departments?.map((dept) => (
                     <Picker.Item
                       key={dept.id}
                       label={dept.name}
@@ -173,7 +171,7 @@ export default function SignUpScreen() {
 
             <TouchableOpacity
               style={styles.linkButton}
-              onPress={() => navigate("/sign-in")}
+              onPress={() => navigate('/sign-in')}
               disabled={loading}
             >
               <Text style={styles.linkText}>Já tem conta? Faça login</Text>
@@ -188,15 +186,15 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     flexGrow: 1,
   },
   content: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 24,
     paddingTop: 60,
     paddingBottom: 40,
@@ -207,65 +205,65 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: "#666",
+    color: '#666',
     marginBottom: 32,
   },
   form: {
-    width: "100%",
+    width: '100%',
     maxWidth: 400,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#e0e0e0',
   },
   pickerContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
-    overflow: "hidden",
+    borderColor: '#e0e0e0',
+    overflow: 'hidden',
   },
   picker: {
     height: 50,
   },
   loadingDepts: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 16,
     marginBottom: 16,
   },
   loadingDeptsText: {
     marginLeft: 8,
-    color: "#666",
+    color: '#666',
   },
   button: {
-    backgroundColor: "#6366f1",
+    backgroundColor: '#6366f1',
     borderRadius: 12,
     padding: 16,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 8,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   linkButton: {
     marginTop: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   linkText: {
-    color: "#6366f1",
+    color: '#6366f1',
     fontSize: 14,
   },
 });
