@@ -1,6 +1,6 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { SecureAuthStorage } from '../auth/secure-auth-storage';
-import { useAuth } from '../stores/auth.store';
+import { registerInterceptors } from './http.interceptors';
 
 const storage = new SecureAuthStorage();
 
@@ -14,14 +14,6 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      await useAuth.getState().logout();
-    }
-    return Promise.reject(error);
-  }
-);
+registerInterceptors();
 
 export { api };

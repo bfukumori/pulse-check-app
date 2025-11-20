@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
   ActivityIndicator,
@@ -27,14 +27,32 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [departmentId, setDepartmentId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
+
+  const { register } = useAuth();
+  const { navigate } = useRouter();
+
   const { data: departments, isPending } = useQuery({
     queryKey: ['departments'],
     queryFn: getDepartmentsService,
     staleTime: Infinity,
   });
 
-  const { register } = useAuth();
-  const { navigate } = useRouter();
+  const { mutateAsync: signUp } = useMutation({
+    mutationFn: register,
+    onSuccess: () => {
+      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
+        {
+          text: 'Ir para Login',
+          onPress: () => navigate('/sign-in'),
+        },
+      ]);
+    },
+    onError: (error) =>
+      Alert.alert('Erro', error.message || 'Erro ao criar conta'),
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -53,25 +71,13 @@ export default function SignUpScreen() {
     }
 
     setLoading(true);
-    try {
-      await register({
-        name,
-        email,
-        password,
-        departmentId,
-      });
 
-      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-        {
-          text: 'Ir para Login',
-          onPress: () => navigate('/sign-in'),
-        },
-      ]);
-    } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao criar conta');
-    } finally {
-      setLoading(false);
-    }
+    await signUp({
+      name,
+      email,
+      password,
+      departmentId,
+    });
   };
 
   return (
