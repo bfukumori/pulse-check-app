@@ -1,7 +1,9 @@
 import { Picker } from '@react-native-picker/picker';
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
+
+import { useQuery } from '@tanstack/react-query';
+
 import {
   ActivityIndicator,
   Alert,
@@ -14,7 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import { getDepartmentsService } from '../infra/services/departments/get-departments.service';
+import { useAuth } from '../infra/stores/auth.store';
 
 export default function SignUpScreen() {
   const [name, setName] = useState('');
@@ -29,6 +33,7 @@ export default function SignUpScreen() {
     staleTime: Infinity,
   });
 
+  const { register } = useAuth();
   const { navigate } = useRouter();
 
   const handleRegister = async () => {
@@ -49,7 +54,19 @@ export default function SignUpScreen() {
 
     setLoading(true);
     try {
-      console.log('TODO: Cadastrar usuário');
+      await register({
+        name,
+        email,
+        password,
+        departmentId,
+      });
+
+      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
+        {
+          text: 'Ir para Login',
+          onPress: () => navigate('/sign-in'),
+        },
+      ]);
     } catch (error: any) {
       Alert.alert('Erro', error.message || 'Erro ao criar conta');
     } finally {
