@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { SecureAuthStorage } from '../auth/secure-auth-storage';
-import { registerInterceptors } from './http.interceptors';
 
 const storage = new SecureAuthStorage();
 
@@ -13,7 +12,5 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
-
-registerInterceptors();
 
 export { api };

@@ -1,3 +1,5 @@
+import '../infra/http/http.interceptors';
+
 import {
   DarkTheme,
   DefaultTheme,
