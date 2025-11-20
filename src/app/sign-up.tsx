@@ -1,4 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -13,17 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-const departments = [
-  {
-    id: 1,
-    name: 'RH',
-  },
-  {
-    id: 2,
-    name: 'TI',
-  },
-];
+import { getDepartmentsService } from '../infra/services/departments/get-departments.service';
 
 export default function SignUpScreen() {
   const [name, setName] = useState('');
@@ -32,6 +23,11 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [departmentId, setDepartmentId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
+  const { data: departments, isPending } = useQuery({
+    queryKey: ['departments'],
+    queryFn: getDepartmentsService,
+    staleTime: Infinity,
+  });
 
   const { navigate } = useRouter();
 
@@ -112,7 +108,7 @@ export default function SignUpScreen() {
               editable={!loading}
             />
 
-            {false ? (
+            {isPending ? (
               <View style={styles.loadingDepts}>
                 <ActivityIndicator color="#6366f1" />
                 <Text style={styles.loadingDeptsText}>
@@ -133,7 +129,7 @@ export default function SignUpScreen() {
                     label="Selecione um departamento (opcional)"
                     value={undefined}
                   />
-                  {departments.map((dept) => (
+                  {departments?.map((dept) => (
                     <Picker.Item
                       key={dept.id}
                       label={dept.name}

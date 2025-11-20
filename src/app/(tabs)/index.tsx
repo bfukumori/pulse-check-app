@@ -1,9 +1,9 @@
 import { CheckinModal } from '@/src/components/check-in-modal';
-import {
-  DashboardStats,
-  DashboardStatsProps,
-} from '@/src/components/dashboard-stats';
+import { DashboardStats } from '@/src/components/dashboard-stats';
+import { SuggestionModal } from '@/src/components/suggestion-modal';
+import { getStatsService } from '@/src/infra/services/stats/get-stats.service';
 import { useAuth } from '@/src/infra/stores/auth.store';
+import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,27 +16,19 @@ import {
   View,
 } from 'react-native';
 
-const mockStats = {
-  averageMood: 3,
-  totalCheckins: 2,
-  last7Days: [
-    {
-      date: new Date().toISOString(),
-      averageMood: 4,
-    },
-    {
-      date: new Date().toISOString(),
-      averageMood: 2,
-    },
-  ],
-};
-
 export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [stats, setStats] = useState<DashboardStatsProps['stats']>(mockStats);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const { logout } = useAuth();
+  const [suggestionModalVisible, setSuggestionModalVisible] = useState(false);
+  const { logout, user } = useAuth();
+
+  const {
+    data: stats,
+    isPending: loading,
+    isRefetching: refreshing,
+  } = useQuery({
+    queryKey: ['stats'],
+    queryFn: getStatsService,
+  });
 
   const handleCheckinSuccess = () => {
     setModalVisible(false);
@@ -58,7 +50,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Olá, {'Usuário'}! 👋</Text>
+          <Text style={styles.greeting}>Olá, {user?.name}! 👋</Text>
           <Text style={styles.subtitle}>Como você está se sentindo hoje?</Text>
         </View>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
@@ -99,6 +91,20 @@ export default function HomeScreen() {
           </View>
         )}
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setSuggestionModalVisible(true)}
+      >
+        <Text style={styles.fabText}>💡</Text>
+      </TouchableOpacity>
+
+      {suggestionModalVisible && (
+        <SuggestionModal
+          visible={suggestionModalVisible}
+          closeModal={() => setSuggestionModalVisible(false)}
+        />
+      )}
 
       <CheckinModal
         visible={modalVisible}
@@ -192,5 +198,25 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     textAlign: 'center',
     paddingHorizontal: 32,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: '#6366f1',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  fabText: {
+    fontSize: 20,
+    color: '#fff',
   },
 });
